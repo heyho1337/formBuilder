@@ -1,0 +1,70 @@
+@import "variables";
+
+.formMDL{
+	display:grid;
+	grid-template-columns: 100%;
+	grid-row-gap: 2px;
+	width:95vw;
+	max-width:400px;
+	*{
+		backface-visibility: hidden;
+		-webkit-font-smoothing: antialiased;
+		outline: none;
+	}
+	> div{
+		&:has(input[type="text"]), &:has(input[type="email"]){
+			background:$dark;
+			height: 40px;
+			position: relative;
+			align-items: center;
+			align-content: center;
+			display:grid;
+			grid-template-columns: 100%;
+			input{
+				height:inherit;
+				grid-row:1;
+				background: transparent;
+				border:0px;
+				width:100%;
+				position: relative;
+				z-index: 1;
+				color:#fff;
+				padding:0px 0px 0px 6px;
+				&:focus, &:not(:placeholder-shown){
+					+ label{
+						transform: translate(0px, -13px) translate3d( 0, 0, 0) perspective(1px);
+						opacity: .4;
+						font-size: 10px;
+					}
+				}
+				&::placeholder{
+					opacity:0;
+					font-size:0px;
+				}
+			}
+			label{
+				height:inherit;
+				width:100%;
+				grid-row:1;
+				position: absolute;
+				display:grid;
+				align-content: center;
+				padding-left:6px;
+				color:#fff;
+				transition: opacity 0.2s ease, font-size 0.2s ease, transform 0.2s ease;
+			}
+		}
+		&:has(button){
+			button{
+				display:table;
+				margin:0px auto;
+				border:0px;
+				padding:0px 30px;
+				cursor:pointer;
+				background: $or;
+				color:#fff;
+				@include roundBtn(40px);
+			}
+		}
+	}
+}
