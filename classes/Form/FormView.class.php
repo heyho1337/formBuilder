@@ -7,7 +7,7 @@
 		protected string $formHTML = "";
 		protected string $formInput = "";
 
-		function __construct(protected array $input){
+		function __construct(protected array $input, protected bool $captcha){
 
 		}
 
@@ -53,7 +53,11 @@
 		}
 
 		protected function submit($row){
-			return "
+			$cap = "";
+			if($this->captcha === true){
+				$cap = "<input type='hidden' name='recaptcha_response' id='recaptchaResponse'>";
+			}
+			return "{$cap}
 				<button type='submit' data-label='{$row->label}' title='{$row->title}' name='{$row->name}' value='{$row->value}'>{$row->label}</button>
 			";
 		}

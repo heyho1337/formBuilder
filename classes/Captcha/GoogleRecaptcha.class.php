@@ -5,13 +5,25 @@
 	class GoogleRecaptcha {
 		/* Google recaptcha API url */
     	const google_url = "https://www.google.com/recaptcha/api/siteverify";
+		private static $instance;
 
-		function __construct(protected string $secretKey){
-			
+		function __construct(protected string $secretKey,protected string $siteKey){
+			echo "<script src='https://www.google.com/recaptcha/api.js?render={$this->siteKey}'></script>
+			<script>
+				grecaptcha.ready(function () {
+					grecaptcha.execute('{$siteKey}', { action: 'contact' }).then(function (token) {
+						if (document.getElementById('recaptchaResponse') !=null) {
+							var recaptchaResponse = document.getElementById('recaptchaResponse');
+							recaptchaResponse.value = token;
+						}
+					});
+				});
+			</script>
+			";
 		}
 
 		public function Verify($response){
-			$url = self::google_url."?secret=".$this->secretKey."&response=".$response;
+			$url = self::google_url."?secret=".$this->secretKey."&response=".$response."&remoteip=".$_SERVER['REMOTE_ADDR'];
 
 			$curl = curl_init();
 			curl_setopt($curl, CURLOPT_URL, $url);
@@ -31,4 +43,14 @@
 				return false;
 			}
 		}
+
+		public static function getInstance(...$args) {
+			if (!self::$instance) {
+				self::$instance = new self(...$args);
+			}
+			return self::$instance;
+		}
+
+		private function __clone() {}
+    	public function __wakeup() {}
 	}

@@ -43,6 +43,10 @@
 			'class' => 'submit'
 		],
 	];
-	$formView = new \Form\FormView($inputList);
+	$formView = new \Form\FormView($inputList,true);
+	$formContrl = new \Form\FormContrl($input,true,"test","test subject","recipient@test.com");
+	if($formContrl->captcha === true){
+		$cap = new \Captcha\GoogleRecaptcha("secretKey","sitekey");
+	}
 	echo $formView->loadResources();
 	echo $formView->showForm('post','','test','test');

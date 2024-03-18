@@ -20,7 +20,7 @@
 			'form_to' => 'VARCHAR(50)'
 		];
 		
-		function __construct(protected array $input, protected bool $captcha, protected string $name, protected string $subject, protected string $to){
+		function __construct(protected array $input, public bool $captcha, protected string $name, protected string $subject, protected string $to){
 			$this->dialog = new \Common\Dialog();
 		}
 
@@ -56,7 +56,7 @@
 			$this->errorCount = 0;
 			$this->verified = true;
 			if($this->captcha === true){
-				$cap = new \Captcha\GoogleRecaptcha("secretKey");
+				$cap = \Captcha\GoogleRecaptcha::getInstance();
 				$response = $_POST['g-recaptcha-response-'.$this->name];
 				if(!empty($response)){
 					$this->verified = $cap->Verify($response);  
