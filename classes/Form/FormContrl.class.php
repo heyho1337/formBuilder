@@ -6,40 +6,34 @@
 
 		public array $resultList;
 		protected object $dialog;
+		protected bool $verified = true;
+		protected int $errorCount = 0;
+
+		/***
+		 * database table for the forms's submit data
+		*/
+		protected const formTable = [
+			'form_id' => 'INT AUTO_INCREMENT PRIMARY KEY',
+			'form_fields' => 'TEXT',
+			'form_name' => 'VARCHAR(50)',
+			'form_subject' => 'VARCHAR(50)',
+			'form_to' => 'VARCHAR(50)'
+		];
 		
-		function __construct(protected array $input, protected string $captchaExits, protected string $name){
+		function __construct(protected array $input, protected bool $captcha, protected string $name, protected string $subject, protected string $to){
 			$this->dialog = new \Common\Dialog();
 		}
 
-		public function sendForm($send,$mail,$db,$to,$subject,$success){
-			$this->resultList = [];
+		public function sendForm($mail,$db,$to,$subject,$send = null,$success = null){
 			$submitSearch = array_search('submit', array_column($this->input, 'type'));
 			if ($submitSearch !== false) {
 				$submitObj = $this->input[$submitSearch];
 				if(isset($_POST[$submitObj->name])){
-					$verified = true;
-					if($this->captchaExits === true){
-						$cap = new \Captcha\GoogleRecaptcha("secretKey");
-						$response = $_POST['g-recaptcha-response-'.$this->name];
-						if(!empty($response)){
-							$verified = $cap->Verify($response);  
-							if(!$verified){
-								array_push($this->resultList,"captcha failed");
-							}
+					$this->validateForm();
+					if($this->verified && $this->errorCount > 0){
+						if(is_callable($send())){
+							$send();
 						}
-						else{
-							array_push($this->resultList,"captcha failed");
-						}
-					}
-					$errorCount = 0;
-					foreach($this->input as $row){
-						$valid = $this->validate($row);
-						if(!$valid){
-							$errorCount++;
-						}
-					}
-					if($verified && $errorCount > 0){
-						$send();
 						if($mail === true){
 							$this->sendMail($to,$subject,$success);
 						}
@@ -57,7 +51,32 @@
 
 		}
 
-		protected function validate($inputRow){
+		protected function validateForm(){
+			$this->resultList = [];
+			$this->errorCount = 0;
+			$this->verified = true;
+			if($this->captcha === true){
+				$cap = new \Captcha\GoogleRecaptcha("secretKey");
+				$response = $_POST['g-recaptcha-response-'.$this->name];
+				if(!empty($response)){
+					$this->verified = $cap->Verify($response);  
+					if(!$this->verified){
+						array_push($this->resultList,"captcha failed");
+					}
+				}
+				else{
+					array_push($this->resultList,"captcha failed");
+				}
+			}
+			foreach($this->input as $row){
+				$valid = $this->validateInput($row);
+				if(!$valid){
+					$this->errorCount++;
+				}
+			}
+		}
+
+		protected function validateInput($inputRow){
 			if($inputRow->required === 'required' && empty($_POST[$inputRow->name])){
 				array_push($this->resultList, $inputRow->title." input cannot be empty");
 				return false;
@@ -73,15 +92,16 @@
 			}
 		}
 
-		protected function sendMail($to,$subject,$success){
+		protected function sendMail($success = null){
 			$mail = new \PHPMailer\PHPMailer\PHPMailer();
 			$mail->Host = "localhost";
 			$mail->From = "noreply@noreply.hu";
 			$mail->FromName = "noreply";
 			$mail->CharSet = "utf-8";
-			$mail->AddAddress($to);
-			$mail->Subject = $subject;
-			$mailtext = "<html><head><title></title></head><body>";
+			$mail->AddAddress($this->to);
+			$mail->Subject = $this->subject;
+			$mailtext = "<html><head><title>{$this->subject}</title></head><body>
+			<h1>{$this->subject}</h1>";
 			foreach($this->input as $row){
 				switch($row->type){
 					case 'checkbox':
@@ -99,15 +119,27 @@
 			}
 			$mailtext .= "</body></html>";
 			$mail->MsgHTML($mailtext);
-			$mail->IsHTML(true); // send as HTML
+			$mail->IsHTML(true);
 			if (!$mail->Send()) {
 				array_push($this->resultList,$mail->ErrorInfo);
 			} else {
-				$success();
+				if(is_callable($success())){
+					$success();
+				}
 			}    
 		}
 
 		protected function saveToDb(){
-			$db = new \Db\SqlDb();
+			$db = \Db\SqlDb::getInstance();
+			$db->create('forms',self::formTable);
+			$fields = [];
+			foreach($this->input as $row){
+				$fields[$row->label] = $_POST[$row->name];
+			}
+			$_POST['form_fields'] = json_encode($fields);
+			$_POST['form_name'] = $this->name;
+			$_POST['form_subject'] = $this->subject;
+			$_POST['form_to'] = $this->to;
+			$db->insert('forms');
 		}
 	}
