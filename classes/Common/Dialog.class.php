@@ -2,8 +2,12 @@
 	
 	namespace Common;
 
+	/**
+	 * Class Common\Dialog
+	*/
 	class Dialog{
 		
+
 		public function showDialog($text) {
 			$id = $this->randomPassword(10);
 			$dialog = "<dialog open id=\"{$id}\"><p>{$text}</p><button class=\"closeButton\" autofocus>Bezár</button></dialog>";

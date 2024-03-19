@@ -2,6 +2,9 @@
 
 	namespace Form;
 
+	/**
+	 * Class Form\FormContrl
+	*/
 	class FormContrl{
 
 		public array $resultList;
@@ -20,11 +23,34 @@
 			'form_to' => 'VARCHAR(50)'
 		];
 		
+		/**
+		 * @param array $input - an array that should contain the form's input elements
+		 * @param bool $captcha - true | false determines if there should be a captcha
+		 * inside the form or not.
+		 * @param string $name - the form's html name attribute
+		 * @param string $subject - the subject that will appear inside the email the 
+		 * form will send out after submission
+		 * @param string $to - the email address where the form will send the email
+		 * after it's submission
+		*/
 		function __construct(protected array $input, public bool $captcha, protected string $name, protected string $subject, protected string $to){
 			$this->dialog = new \Common\Dialog();
 		}
 
-		public function sendForm($mail,$db,$to,$subject,$send = null,$success = null){
+		/**
+		 * the form's submission
+		 * @param bool $mail - true | false determines if the form should send an email or not
+		 * @param bool $db - true | false determines if the form should save it's data into a 
+		 * database or not
+		 * @param string $to - the email address where the form will send the email
+		 * after it's submission
+		 * @param string $subject - the subject that will appear inside the email the 
+		 * form will send out after submission
+		 * @param callable $send - you can add your own function to the form's submission
+		 * @param callable $success - you can specify what the form should do after the 
+		 * submission is done
+		*/
+		public function sendForm(bool $mail,bool $db,string $to,string $subject,callable $send = null,callable $success = null){
 			$submitSearch = array_search('submit', array_column($this->input, 'type'));
 			if ($submitSearch !== false) {
 				$submitObj = $this->input[$submitSearch];
@@ -51,6 +77,9 @@
 
 		}
 
+		/**
+		 * validating the form and it's input elements
+		*/
 		protected function validateForm(){
 			$this->resultList = [];
 			$this->errorCount = 0;
@@ -76,7 +105,12 @@
 			}
 		}
 
-		protected function validateInput($inputRow){
+		/**
+		 * validating an input element baed on it's type
+		 * @param object $inputRow - the input element's object from the 
+		 * form's input array
+		*/
+		protected function validateInput(object $inputRow){
 			if($inputRow->required === 'required' && empty($_POST[$inputRow->name])){
 				array_push($this->resultList, $inputRow->title." input cannot be empty");
 				return false;
@@ -92,7 +126,12 @@
 			}
 		}
 
-		protected function sendMail($success = null){
+		/**
+		 * the form's email sending function
+		 * @param callable $success - you can specify what the form
+		 * should do after it's successfully send out the email
+		*/
+		protected function sendMail(callable $success = null){
 			$mail = new \PHPMailer\PHPMailer\PHPMailer();
 			$mail->Host = "localhost";
 			$mail->From = "noreply@noreply.hu";
@@ -129,6 +168,9 @@
 			}    
 		}
 
+		/**
+		 * saving the form's data into the database
+		*/
 		protected function saveToDb(){
 			$db = \Db\SqlDb::getInstance();
 			$db->create('forms',self::formTable);
