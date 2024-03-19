@@ -11,6 +11,18 @@
 
 		}
 
+		private static $instance;
+
+		public static function getInstance(...$args) {
+			if (!self::$instance) {
+				self::$instance = new self(...$args);
+			}
+			return self::$instance;
+		}
+
+		private function __clone() {}
+    	public function __wakeup() {}
+
 		public function select($table, $columns, $where, $order, $group = null){
 
 		}

@@ -46,18 +46,18 @@
 		 * after it's submission
 		 * @param string $subject - the subject that will appear inside the email the 
 		 * form will send out after submission
-		 * @param callable $send - you can add your own function to the form's submission
-		 * @param callable $success - you can specify what the form should do after the 
+		 * @param string $send - you can add your own function to the form's submission
+		 * @param string $success - you can specify what the form should do after the 
 		 * submission is done
 		*/
-		public function sendForm(bool $mail,bool $db,string $to,string $subject,callable $send = null,callable $success = null){
+		public function sendForm(bool $mail,bool $db,string $to,string $subject, $send = null, $success = null){
 			$submitSearch = array_search('submit', array_column($this->input, 'type'));
 			if ($submitSearch !== false) {
 				$submitObj = $this->input[$submitSearch];
 				if(isset($_POST[$submitObj->name])){
 					$this->validateForm();
-					if($this->verified && $this->errorCount > 0){
-						if(is_callable($send())){
+					if($this->verified && $this->errorCount === 0){
+						if(is_callable($send)){
 							$send();
 						}
 						if($mail === true){
@@ -71,7 +71,8 @@
 					foreach($this->resultList as $row){
 						$resultText.= $row."<br/>";
 					}
-					$this->dialog->showDialog($resultText);
+					echo $resultText;
+					echo $this->dialog->showDialog($resultText);
 				}
 			}
 
@@ -128,11 +129,11 @@
 
 		/**
 		 * the form's email sending function
-		 * @param callable $success - you can specify what the form
+		 * @param string $success - you can specify what the form
 		 * should do after it's successfully send out the email
 		*/
-		protected function sendMail(callable $success = null){
-			$mail = new \PHPMailer\PHPMailer\PHPMailer();
+		protected function sendMail($success = null){
+			$mail = new \PHPMailer\PHPMailer();
 			$mail->Host = "localhost";
 			$mail->From = "noreply@noreply.hu";
 			$mail->FromName = "noreply";
@@ -162,7 +163,7 @@
 			if (!$mail->Send()) {
 				array_push($this->resultList,$mail->ErrorInfo);
 			} else {
-				if(is_callable($success())){
+				if(is_callable($success)){
 					$success();
 				}
 			}    

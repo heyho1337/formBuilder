@@ -19,7 +19,7 @@
  * FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-namespace PHPMailer\PHPMailer;
+namespace PHPMailer;
 
 /**
  * PHPMailer - PHP email creation and transport class.
@@ -1944,7 +1944,7 @@ class PHPMailer
      *
      * @see PHPMailer::setSMTPInstance() to use a different class.
      *
-     * @uses \PHPMailer\PHPMailer\SMTP
+     * @uses \PHPMailer\SMTP
      *
      * @param string $header The message headers
      * @param string $body   The message body
@@ -2034,7 +2034,7 @@ class PHPMailer
      *
      * @throws Exception
      *
-     * @uses \PHPMailer\PHPMailer\SMTP
+     * @uses \PHPMailer\SMTP
      *
      * @return bool
      */

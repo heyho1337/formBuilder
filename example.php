@@ -36,15 +36,15 @@
 			'name' => 'send',
 			'title' => 'Submit form',
 			'label' => 'Send',
-			'required' => 'required',
+			'required' => '',
 			'value' => '',
 			'options' => [],
 			'type' => 'submit',
 			'class' => 'submit'
 		],
 	];
-	$formView = new \Form\FormView($inputList,true);
-	$formContrl = new \Form\FormContrl($input,true,"test","test subject","recipient@test.com");
+	$formView = new \Form\FormView($inputList,false);
+	$formContrl = new \Form\FormContrl($inputList,false,"test","test subject","recipient@test.com");
 	if($formContrl->captcha === true){
 		$cap = new \Captcha\GoogleRecaptcha("secretKey","sitekey");
 	}

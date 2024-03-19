@@ -15,15 +15,7 @@
 
 		private static $instance;
 
-		public static function getInstance(...$args) {
-			if (!self::$instance) {
-				self::$instance = new self(...$args);
-			}
-			return self::$instance;
-		}
-
-		private function __clone() {}
-    	public function __wakeup() {}
+		abstract public static function getInstance(...$args);
 		
 		/**
 		 * select row or rows from the databse
